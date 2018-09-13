@@ -135,7 +135,7 @@ def configure_init_service(coinname, mn_name, masternode_executable_abspath, mas
     generate_init_service(servicefile_abspath, masternode_fullname, start_command, stop_command)
     # Enable boot service
     if cfg['services'] == 'enabled':
-        run_command("systemctl enable %s" %masternode_fullname, cfg['test']==enabled)
+        run_command("systemctl enable %s" %masternode_fullname)
 
 #Function to generate an UFW application profile
 def generate_ufw_profile(filename_abspath, name, title, description, ports, protocols):
@@ -159,7 +159,7 @@ def configure_ufw_firewall(masternode_name, ufwprofiledir_abspath, ports, protoc
     #Generating firewall profile
     generate_ufw_profile(ufwprofile_abspath, masternode_name, "Masternode "+masternode_name, "Provides %s masternode service" %masternode_name, mn['ports'], mn['protocols'])
     # Allow firewall profile
-    run_command("ufw allow %s" %masternode_name, cfg['test']==enabled)
+    run_command("ufw allow %s" %masternode_name)
 
 # Function to generate the Tokugawa.conf file under the MN directory
 def generate_masternode_tokugawaconf(filename_abspath, masternode_name, rcpport, ip, port, privkey):
@@ -186,7 +186,7 @@ def install_masternode_binaries(executable_abspath, masternode_executable_abspat
     os.chmod(masternode_executable_abspath, 0o755)
 
 #Function to deploy a masternode configuration in the desire location
-def deploy_masternode_configuration(coinname, mn, installdir_abspath):
+def deploy_masternode_configuration(coinname, mn, masternodedir_abspath):
     #Masternode specific configuration
     if coinname == 'Tokugawa':
         #Tokugawa.conf file generation
@@ -206,11 +206,11 @@ def deploy_masternode_bootstrap(coinname, bootstrap_abspath, masternodedir_abspa
         #Set access rights to file
         os.chmod(masternode_bootstrap_abspath, 0o644)
 
-def run_command(command, test = False):
+def run_command(command):
     # Launch the command with pexpect need to send the command join reverse the shlex
     #command_child = subprocess.list2cmdline(self.command)
-    if test:
-        print("[TEST_MODE]: %s"%command)
+    if TEST_MODE:
+        print("[TEST_MODE]: %s" %command)
         return
     try:
         subprocess.call(command, shell=True)
@@ -253,9 +253,11 @@ if (not os.path.exists(executable_abspath)) or (not os.path.exists(configuration
 with open(configuration_abspath, 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
+TEST_MODE=cfg['test']=='enabled'
+
 if cfg['coinname'] not in supported_coins:
     print('Sorry the selected coin is not yet supported!')
-    pritn('List of supported coins: %s' %supported_coins)
+    print('List of supported coins: %s' %supported_coins)
 
 #Show presentation
 show_banner()
@@ -266,7 +268,8 @@ print('  >> Installing required packages')
 print('     NOTE: The installer will download and install the packages automatically')
 input('           Press ENTER to continue, or CTRL+C to abort installation.\n')
 for cmd in cfg['preparation']:
-    run_command(cmd, cfg['test']==enabled)
+    run_command(cmd)
+
 print('')
 print('[INSTALLATION START]')
 for mn in cfg['MASTERNODES']:
@@ -306,7 +309,7 @@ print('')
 
 #Enable firewall
 print('')
-print('IMPORTANT SSH ACCESS COULD BE BLOCKED!!!'
+print('IMPORTANT SSH ACCESS COULD BE BLOCKED!!!')
 print('Check that OpenSSH access rule is set in UFW firewall before running:')
 print('\'$ufw enable; $ufw start\'')
 print('')
