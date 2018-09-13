@@ -3,9 +3,7 @@
 <b>Masternode installer instructions</b>
 <br/> ────────────────────────────────────────────────────
 <br/>
-<br/> BROKEN BUILD WORK IN PROGRESS... SORRY
-<br/>
-<br/> A beautiful python installer that allows you to install your beloved masternodes withing minutes.
+<br/> A beautiful python installer that allows you to install your beloved masternodes within minutes.
 <br/> 
 <br/> NOTE: Currently the installer ONLY supports TOKUGAWA coin, more coins will be added.
 <br/>
@@ -13,14 +11,10 @@
 <br/>
 <br/> In order to run this program the below python3 libraries need to be installed:
 <br/> &nbsp; &nbsp; $sudo apt-get install python3-pip python3-yaml
-<br/> Additionally ufw firewall must be installed:
-<br/> $sudo apt install ufw
 <br/> 
-<br/> In addition the following files are needed:
-<br/> &nbsp; &nbsp; - A precompiled binary containing the latest version of the masternode daemon 
-<br/> &nbsp; &nbsp;   NOTE: that the binary dependant libraries must be pre-installed (Work on progress).
-<br/> &nbsp; &nbsp; - Ufw firewall will be automatically configured to enable SSH/Tokugawa ports. ($apt install ufw).
-<br/> &nbsp; &nbsp; - [Optional] A bootstrap file to accelerate the initial masternode synchronisation.
+<br/> In order the installer the following files are needed:
+<br/> &nbsp; &nbsp; - A precompiled binary containing the latest version of the masternode daemon.
+<br/> &nbsp; &nbsp; - [Optional] A bootstrap.dat file to accelerate the initial masternode synchronisation.
 <br/>
 <br/> <b>1. Copying the necessary files</b>
 <br/>
@@ -32,8 +26,8 @@
 <br/> -- This is a configuration example, please modify as needed before running the installer--
 <br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/crypto_tools/master/masternode_installer/config_tokugawa.yml
 <br/>
-<br/> &nbsp; &nbsp; In addition get your tokugawad binary from your favourite source or compile it.
 <br/> &nbsp; &nbsp; A bootstrap.dat file is optional but very recommended if you want to have your MNs running asap.
+<br/> &nbsp; &nbsp; The bootstrap for Tokugawa i.e can be retrieved from here -> https://github.com/mangae/Tokugawa_mangae.
 <br/>
 <br/> <b>2. Setting your configuration file</b>
 <br/> 
@@ -44,15 +38,18 @@
 <br/> &nbsp; &nbsp; $./masternode_installer.py installdir executable configuration.yml [ --bootstrap bootstrap.dat ]
 <br/>
 <br/> &nbsp; &nbsp; Execution examples:
-<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./tokugawad ./config_tokugawa.yml --bootstrap /tmp/bootstrap.dat
-<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./tokugawad ./config_tokugawa.yml
+<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./Tokugawad ./config_tokugawa.yml --bootstrap /tmp/bootstrap.dat
+<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./Tokugawad ./config_tokugawa.yml
 <br/>
-<br/> <b>4. Enabling tokugawa services automatically at boot</b>
-<br/> &nbsp; &nbsp; $systemctl enable tokugawa_mn*
-<br/> 
-<br/> If during the installation ufw firewall was detected the following steps must be done:
-<br/> &nbsp; &nbsp; $ufw stop; 
-<br/> &nbsp; &nbsp; $ufw allow tokugawa_mn*; $ufw enable; 
+<br/> <b>4. Manually starting stopping masternode services</b>
+<br/> During the installation boot services for your masternodes had been configured if services was enabled in the 
+<br/> configuration file.
+<br/> You can manually start/stop a masternode executing: 
+<br/> &nbsp; &nbsp; $/etc/init.d/Tokugawa_MN01 stop | start | status.
+<br/>
+<br/> <b>5. Firewall</b>
+<br/> During the installation ufw firewall profiles had been installed.
+<br/> IMPORTANT!!!! Before activating firewall please add SSH rules in your UFW firewall configuration if needed. 
 <br/> &nbsp; &nbsp; $systemctl enable ufw;
 <br/>
 <br/> <b>5. Donations</b>
