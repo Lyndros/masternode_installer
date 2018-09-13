@@ -246,14 +246,15 @@ if cfg['coinname'] not in supported_coins:
 
 #Show presentation
 show_banner()
-show_warning(cfg['SYSTEM']['description'])
+show_warning(cfg['system'])
 
 print('[PREREQUISITES]')
 print('  >> Installing required packages [WORKING ON PROGRESS]')
 
 if cfg['test']=='enabled':
+    #package_install(cfg['packages'])
+    run_command("/usr/bin/apt-get install " + cfg['commands'])
     exit("Testing packages finish")
-
 
 print('[INSTALLATION START]')
 for mn in cfg['MASTERNODES']:

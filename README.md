@@ -27,9 +27,10 @@
 <br/> &nbsp; &nbsp; $mkdir -p /tmp/masternode_installer/
 <br/> &nbsp; &nbsp; $cd /tmp/masternode_installer/
 <br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/crypto_tools/master/masternode_installer/masternode_installer.py
+<br/> &nbsp; &nbsp; $chmod a+x masternode_installer.py
 <br/>
 <br/> -- This is a configuration example, please modify as needed before running the installer--
-<br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/crypto_tools/master/masternode_installer/tokugawa_config.yml
+<br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/crypto_tools/master/masternode_installer/config_tokugawa.yml
 <br/>
 <br/> &nbsp; &nbsp; In addition get your tokugawad binary from your favourite source or compile it.
 <br/> &nbsp; &nbsp; A bootstrap.dat file is optional but very recommended if you want to have your MNs running asap.
@@ -40,11 +41,11 @@
 <br/> If you run multiple masternodes in the same VPS, you can share the IP, take into account that ports must be different.
 <br/>
 <br/> <b>3. Running the installer</b>
-<br/> &nbsp; &nbsp; $./masternode_installer.py installation_directory tokugawad_executable configuration.yml [ --bootstrap bootstrap.dat ]
+<br/> &nbsp; &nbsp; $./masternode_installer.py installdir executable configuration.yml [ --bootstrap bootstrap.dat ]
 <br/>
 <br/> &nbsp; &nbsp; Execution examples:
-<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa /tmp/tokugawad /tmp/tokugawa_config.yml --bootstrap /tmp/bootstrap.dat
-<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa /tmp/tokugawad /tmp/tokugawa_config.yml
+<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./tokugawad ./config_tokugawa.yml --bootstrap /tmp/bootstrap.dat
+<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./tokugawad ./config_tokugawa.yml
 <br/>
 <br/> <b>4. Enabling tokugawa services automatically at boot</b>
 <br/> &nbsp; &nbsp; $systemctl enable tokugawa_mn*

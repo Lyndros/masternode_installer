@@ -18,10 +18,15 @@
 #            USUALLY THESE SETTINGS DOES NOT NEED TO BE MODIFIED              #
 ###############################################################################
 #GENERAL OS SETTINGS
-SYSTEM:
-        description: Ubuntu 18.04
-        packages:    build-essential libtool autotools-dev pkg-config libssl-dev libboost-all-dev autoconf automake
-                     libqt4-dev libminiupnpc-dev libgmp-dev openssl libdb4.8-dev libdb4.8++-dev
+system:   Ubuntu 18.04
+commands:
+        - /usr/bin/apt-get install -y build-essential libtool autotools-dev pkg-config libssl-dev libboost-all-dev autoconf automake
+        - /usr/bin/apt-get install -y libqt4-dev libminiupnpc-dev
+        - /usr/bin/apt-get install -y libgmp-dev
+        - /usr/bin/apt-get install -y openssl
+        - /usr/bin/apt-get install -y apt-get install software-properties-common && add-apt-repository ppa:bitcoin/bitcoin
+        - /usr/bin/apt-get update  -y
+        - /usr/bin/apt-get install -y libdb4.8-dev libdb4.8++-dev
 
 ###############################################################################
 #         MASTERNODE CONFIGURATION                                            #
