@@ -30,7 +30,7 @@ preparation:
         - /usr/bin/apt-get install -y libdb4.8-dev libdb4.8++-dev
         - /usr/bin/apt-get install -y ufw
 
-firewall_profiles: /etc/ufw/aplications.d/
+firewall_profiles: /etc/ufw/applications.d/
 
 ###############################################################################
 #         MASTERNODE CONFIGURATION                                            #
@@ -39,7 +39,6 @@ firewall_profiles: /etc/ufw/aplications.d/
 ###############################################################################
 coinname: Tokugawa
 services: enabled
-test:     enabled                                 #PACKAGES ARE NOT INSTALLED
 
 MASTERNODES:
       - name:             MN01

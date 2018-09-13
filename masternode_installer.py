@@ -90,7 +90,7 @@ def generate_init_service(filename_abspath, name, start_command, stop_command):
         config.write('    exit 3\n');
         config.write('  ;;\n');
         config.write('  status)\n');
-        config.write("    PROG_PID=`sudo -u root ${PIDOF_PROG} %s`;\n" %start_command);
+        config.write("    PROG_PID=`sudo -u root ${PIDOF_PROG} \"%s\"`;\n" %start_command);
         config.write('    if [ $? -eq 0 ]; then\n');
         config.write("      echo \"%s is running with pid ${PROG_PID}\"\n" %name);
         config.write('    else\n');
@@ -98,7 +98,6 @@ def generate_init_service(filename_abspath, name, start_command, stop_command):
         config.write('    fi\n');
         config.write('  ;;\n');
         config.write('  stop)\n');
-        config.write("    PROG_PID=`sudo -u root ${PIDOF_PROG} %s`;\n" %start_command);
         config.write("    echo \"Stopping %s\";\n" %name);
         config.write("    sudo -u root %s;\n" %stop_command);
         config.write('  ;;\n');
@@ -140,7 +139,7 @@ def configure_init_service(coinname, mn_name, masternode_executable_abspath, mas
 #Function to generate an UFW application profile
 def generate_ufw_profile(filename_abspath, name, title, description, ports, protocols):
     #Write application profile
-    with open(filename_abspath, 'w') as config:
+    with open(filename_abspath, 'w+') as config:
         config.write("[%s]\n"           %name)
         config.write("title=%s\n"       %title)
         config.write("description=%s\n" %description)
@@ -155,7 +154,7 @@ def generate_ufw_profile(filename_abspath, name, title, description, ports, prot
 
 def configure_ufw_firewall(masternode_name, ufwprofiledir_abspath, ports, protocols):
     #Parameters
-    ufwprofile_abspath = os.path.abspath(ufwprofiledir_abspath+masternode_name.lower())
+    ufwprofile_abspath = os.path.abspath(ufwprofiledir_abspath+'/'+masternode_name)
     #Generating firewall profile
     generate_ufw_profile(ufwprofile_abspath, masternode_name, "Masternode "+masternode_name, "Provides %s masternode service" %masternode_name, mn['ports'], mn['protocols'])
     # Allow firewall profile
@@ -217,7 +216,6 @@ def run_command(command):
     except OSError as e:
         print ("Error executing command %s" %command)
 
-
 ###############################################################################
 #                                    MAIN                                     #
 ###############################################################################
@@ -253,7 +251,8 @@ if (not os.path.exists(executable_abspath)) or (not os.path.exists(configuration
 with open(configuration_abspath, 'r') as ymlfile:
     cfg = yaml.load(ymlfile)
 
-TEST_MODE=cfg['test']=='enabled'
+#Set global test mode
+TEST_MODE=cfg.get('test', 'disabled')=='enabled'
 
 if cfg['coinname'] not in supported_coins:
     print('Sorry the selected coin is not yet supported!')
@@ -310,6 +309,6 @@ print('')
 #Enable firewall
 print('')
 print('IMPORTANT SSH ACCESS COULD BE BLOCKED!!!')
-print('Check that OpenSSH access rule is set in UFW firewall before running:')
-print('\'$ufw enable; $ufw start\'')
+print('Check that OpenSSH access rule is set in UFW firewall before activating with:')
+print('\'$ufw enable\'')
 print('')
