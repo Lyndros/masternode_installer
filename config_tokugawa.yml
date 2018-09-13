@@ -19,7 +19,8 @@
 ###############################################################################
 #GENERAL OS SETTINGS
 system:   Ubuntu 18.04
-commands:
+
+preparation:
         - /usr/bin/apt-get install -y build-essential libtool autotools-dev pkg-config libssl-dev libboost-all-dev autoconf automake
         - /usr/bin/apt-get install -y libqt4-dev libminiupnpc-dev
         - /usr/bin/apt-get install -y libgmp-dev
@@ -27,6 +28,9 @@ commands:
         - /usr/bin/apt-get install -y apt-get install software-properties-common && add-apt-repository ppa:bitcoin/bitcoin
         - /usr/bin/apt-get update  -y
         - /usr/bin/apt-get install -y libdb4.8-dev libdb4.8++-dev
+        - /usr/bin/apt-get install -y ufw
+
+firewall_profiles: /etc/ufw/aplications.d/
 
 ###############################################################################
 #         MASTERNODE CONFIGURATION                                            #
@@ -34,7 +38,6 @@ commands:
 #         NOTE: Use the same ip address if sharing same VPS for all MNs       #
 ###############################################################################
 coinname: Tokugawa
-firewall: enabled
 services: enabled
 test:     enabled                                 #PACKAGES ARE NOT INSTALLED
 

@@ -111,6 +111,32 @@ def generate_init_service(filename_abspath, name, start_command, stop_command):
     #Set access rights to file
     os.chmod(filename_abspath, 0o755)
 
+#Function that returns start command depending on coin name
+def get_masternode_start_command(coinname, masternode_executable_abspath, masternodedir_abspath):
+    if coinname == 'Tokugawa':
+        start_command = masternode_executable_abspath + " --datadir=%s" %masternodedir_abspath
+
+    return start_command
+
+#Function that returns stop command depending on coin name
+def get_masternode_stop_command(coinname, masternode_executable_abspath):
+    if coinname=='Tokugawa':
+        stop_command = masternode_executable_abspath + " stop"
+
+    return stop_command
+
+def configure_init_service(coinname, mn_name, masternode_executable_abspath, masternode_datadir_abspath):
+    masternode_fullname = "%s_%s".capitalize() %(coinname, mn_name)
+    servicefile_abspath = "/etc/init.d/%s" %masternode_fullname
+    #Masternode specific startup commands
+    start_command = get_masternode_start_command(coinname, masternode_executable_abspath, masternode_datadir_abspath)
+    stop_command  = get_masternode_stop_command (coinname, masternode_executable_abspath)
+    #Generate init service
+    generate_init_service(servicefile_abspath, masternode_fullname, start_command, stop_command)
+    # Enable boot service
+    if cfg['services'] == 'enabled':
+        run_command("systemctl enable %s" %masternode_fullname, cfg['test']==enabled)
+
 #Function to generate an UFW application profile
 def generate_ufw_profile(filename_abspath, name, title, description, ports, protocols):
     #Write application profile
@@ -126,6 +152,14 @@ def generate_ufw_profile(filename_abspath, name, title, description, ports, prot
 
     #Set access rights to file
     os.chmod(filename_abspath, 0o644)
+
+def configure_ufw_firewall(masternode_name, ufwprofiledir_abspath, ports, protocols):
+    #Parameters
+    ufwprofile_abspath = os.path.abspath(ufwprofiledir_abspath+masternode_name.lower())
+    #Generating firewall profile
+    generate_ufw_profile(ufwprofile_abspath, masternode_name, "Masternode "+masternode_name, "Provides %s masternode service" %masternode_name, mn['ports'], mn['protocols'])
+    # Allow firewall profile
+    run_command("ufw allow %s" %masternode_name, cfg['test']==enabled)
 
 # Function to generate the Tokugawa.conf file under the MN directory
 def generate_masternode_tokugawaconf(filename_abspath, masternode_name, rcpport, ip, port, privkey):
@@ -172,33 +206,12 @@ def deploy_masternode_bootstrap(coinname, bootstrap_abspath, masternodedir_abspa
         #Set access rights to file
         os.chmod(masternode_bootstrap_abspath, 0o644)
 
-#Function that returns start command depending on coin name
-def get_masternode_start_command(coinname, masternode_executable_abspath, masternodedir_abspath):
-    if coinname == 'Tokugawa':
-        start_command = masternode_executable_abspath + " --datadir=%s" %masternodedir_abspath
-
-    return start_command
-
-#Function that returns stop command depending on coin name
-def get_masternode_stop_command(coinname, masternode_executable_abspath):
-    if coinname=='Tokugawa':
-        stop_command = masternode_executable_abspath + " stop"
-
-    return stop_command
-
-def package_install(package):
-    cmd = '/usr/bin/apt-get install'.split()
-    cmd.append(package)
-    output_kw = {'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE}
-    p = subprocess.Popen(cmd, **output_kw)
-    status = p.wait()
-    error = p.stderr.read().lower()
-    if status and 'permission denied' in error:
-        raise OSError(errno.EACCES, 'Permission denied running apt-get')
-
-def run_command(command):
+def run_command(command, test = False):
     # Launch the command with pexpect need to send the command join reverse the shlex
     #command_child = subprocess.list2cmdline(self.command)
+    if test:
+        print("[TEST_MODE]: %s"%command)
+        return
     try:
         subprocess.call(command, shell=True)
     except OSError as e:
@@ -249,61 +262,51 @@ show_banner()
 show_warning(cfg['system'])
 
 print('[PREREQUISITES]')
-print('  >> Installing required packages [WORKING ON PROGRESS]')
-
-if cfg['test']=='enabled':
-    #package_install(cfg['packages'])
-    run_command("/usr/bin/apt-get install " + cfg['commands'])
-    exit("Testing packages finish")
-
+print('  >> Installing required packages')
+print('     NOTE: The installer will download and install the packages automatically')
+input('           Press ENTER to continue, or CTRL+C to abort installation.\n')
+for cmd in cfg['preparation']:
+    run_command(cmd, cfg['test']==enabled)
+print('')
 print('[INSTALLATION START]')
 for mn in cfg['MASTERNODES']:
     #Masternode configuration parameters
     masternode_name                = "%s_%s".capitalize() %(cfg['coinname'], mn['name'])
-    masternodedir_abspath          = os.path.abspath(installdir_abspath + "/." + mn['name'])
+    masternode_datadir_abspath     = os.path.abspath(installdir_abspath + "/." + mn['name'])
     masternode_executable_basename = os.path.basename(executable_abspath + "_" + mn['name'])
     masternode_executable_abspath  = os.path.abspath(installdir_abspath + '/' + masternode_executable_basename)
-    ufwprofile_abspath             = "/tmp/etc/ufw/applications.d/%s" %masternode_name.lower()
-    servicefile_abspath            = "/tmp/etc/init.d/%s"             %masternode_name.lower()
-    #Print masternode name
+    ufwprofiledir_abspath          = os.path.abspath(cfg['firewall_profiles'])
+    #Masternode name
     print("  %s" %masternode_name)
     #Create installation directory
-    print('    >> Creating installation directory')
+    print('    >> Creating binaries installation directory')
     create_directory(installdir_abspath)
-    #Install masternode software
+    #Install masternode binaries
     print('    >> Installing binaries')
     install_masternode_binaries(executable_abspath, masternode_executable_abspath)
     #Masternode directory creation
-    create_directory(masternodedir_abspath)
-    #Masternode configuration deployment
-    print('    >> Deploying configuration')
-    deploy_masternode_configuration(cfg['coinname'], mn, masternodedir_abspath)
-    #Masternode bootstrap deployment
+    print('    >> Creating masternode data directory')
+    create_directory(masternode_datadir_abspath)
+    #Configuration deployment
+    print('    >> Deploying masternode configuration')
+    deploy_masternode_configuration(cfg['coinname'], mn, masternode_datadir_abspath)
+    #Bootstrap deployment
     if bootstrap_abspath:
-        print('    >> Deploying bootstrap')
-        deploy_masternode_bootstrap(cfg['coinname'], bootstrap_abspath, masternodedir_abspath)
-    #Generating boot service
-    print('    >> Generating /etc/init.d service')
-    #Masternode specific startup commands
-    start_command = get_masternode_start_command(cfg['coinname'], masternode_executable_abspath, masternodedir_abspath)
-    stop_command  = get_masternode_stop_command(cfg['coinname'], masternode_executable_abspath)
-    generate_init_service(servicefile_abspath, masternode_name, start_command, stop_command)
-    # Enable boot service
-    if cfg['services'] == 'enabled':
-        print(" >> Enabling boot service for %s" %masternode_name)
-        run_command("systemctl enable %s" %masternode_name)
-    #Generating firewall profile
-    print('    >> Generating UFW firewall profile')
-    generate_ufw_profile(ufwprofile_abspath, masternode_name, masternode_name, "Provides %s masternode service" %masternode_name, mn['ports'], mn['protocols'])
-    # Allow firewall profile
-    if cfg['firewall'] == 'enabled':
-        print(" >> Allow %s firewall profile" %masternode_name)
-        run_command("ufw allow %s" %masternode_name)
+        print('    >> Deploying masternode bootstrap')
+        deploy_masternode_bootstrap(cfg['coinname'], bootstrap_abspath, masternode_datadir_abspath)
+    #Init service
+    print('    >> Configuring /etc/init.d service')
+    configure_init_service(cfg['coinname'], mn['name'], masternode_executable_abspath, masternode_datadir_abspath)
+    #Firewall
+    print('    >> Configuring firewall')
+    configure_ufw_firewall(masternode_name, ufwprofiledir_abspath, mn['ports'], mn['protocols'])
 
 print('[INSTALLATION FINISH]')
 print('')
 
 #Enable firewall
-if cfg['firewall'] == 'enabled':
-    print('To activate the firewall please run as root:')
-    print('\'$ufw stop; ufw enable; ufw start\'')
+print('')
+print('IMPORTANT SSH ACCESS COULD BE BLOCKED!!!'
+print('Check that OpenSSH access rule is set in UFW firewall before running:')
+print('\'$ufw enable; $ufw start\'')
+print('')
