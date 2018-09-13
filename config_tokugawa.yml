@@ -1,0 +1,53 @@
+###############################################################################
+# MASTERNODE AUTOINSTALLER by Lyndros <lyndros@hotmail.com>                   #
+###############################################################################
+# Repository: https://github.com/Lyndros/crypto_tools                         #
+#                                                                             #
+# If you want to support and motivate me I accept donations even 1 TOK is     #
+# always welcome :-)!                                                         #
+# > ethereum address: 0x44F102616C8e19fF3FED10c0b05B3d23595211ce              #
+# > tokugawa address: TjrQBaaCPoVW9mPAZHPfVx9JJCq7yZ7QnA                      #
+#                                                                             #
+###############################################################################
+
+###############################################################################
+#                     Configuration for Ubuntu 18.04                          #
+###############################################################################
+
+###############################################################################
+#            USUALLY THESE SETTINGS DOES NOT NEED TO BE MODIFIED              #
+###############################################################################
+#GENERAL OS SETTINGS
+SYSTEM:
+        description: Ubuntu 18.04
+        packages:    build-essential libtool autotools-dev pkg-config libssl-dev libboost-all-dev autoconf automake
+                     libqt4-dev libminiupnpc-dev libgmp-dev openssl libdb4.8-dev libdb4.8++-dev
+
+###############################################################################
+#         MASTERNODE CONFIGURATION                                            #
+#         Define your IP, port and private keys                               #
+#         NOTE: Use the same ip address if sharing same VPS for all MNs       #
+###############################################################################
+coinname: Tokugawa
+firewall: enabled
+services: enabled
+test:     enabled                                 #PACKAGES ARE NOT INSTALLED
+
+MASTERNODES:
+      - name:             MN01
+        rpcport:          21116          
+        ip:               $IP_ADDR_MN01$          #IP FOR MN01
+        ports:
+          - 21117                                 #EXTERNAL PORT FOR MN01
+        protocols:
+          - tcp
+        privkey:          $MN01_PRIVKEY$
+
+      - name:             MN02
+        rpcport:          21118
+        ip:               $IP_ADDR_MN02$          #IP FOR MN02 can be equal to MN01
+        ports:
+          - 21119                                #EXTERNAL PORT FOR MN02
+        protocols:
+          - tcp
+        privkey:          $MN02_PRIVKEY$
