@@ -25,7 +25,8 @@ preparation:
         - /usr/bin/apt-get install -y libqt4-dev libminiupnpc-dev
         - /usr/bin/apt-get install -y libgmp-dev
         - /usr/bin/apt-get install -y openssl
-        - /usr/bin/apt-get install -y apt-get install software-properties-common && add-apt-repository ppa:bitcoin/bitcoin
+        - /usr/bin/apt-get install -y software-properties-common
+        - add-apt-repository ppa:bitcoin/bitcoin
         - /usr/bin/apt-get update
         - /usr/bin/apt-get install -y libdb4.8-dev libdb4.8++-dev
         - /usr/bin/apt-get install -y ufw
