@@ -17,21 +17,22 @@
 ###############################################################################
 #            USUALLY THESE SETTINGS DOES NOT NEED TO BE MODIFIED              #
 ###############################################################################
-#GENERAL OS SETTINGS
-system:   Ubuntu 18.04
+#GENERAL SYSTEM SETTINGS
+SYSTEM:
+        os:                 Ubuntu 18.04
+        services_directory: /etc/systemd/system
+        firewall_profiles:  /etc/ufw/applications.d
 
-preparation:
-        - /usr/bin/apt-get install -y build-essential libtool autotools-dev pkg-config libssl-dev libboost-all-dev autoconf automake
-        - /usr/bin/apt-get install -y libqt4-dev libminiupnpc-dev
-        - /usr/bin/apt-get install -y libgmp-dev
-        - /usr/bin/apt-get install -y openssl
-        - /usr/bin/apt-get install -y software-properties-common
-        - add-apt-repository ppa:bitcoin/bitcoin
-        - /usr/bin/apt-get update
-        - /usr/bin/apt-get install -y libdb4.8-dev libdb4.8++-dev
-        - /usr/bin/apt-get install -y ufw
-
-firewall_profiles: /etc/ufw/applications.d/
+        requires:
+                - apt-get install -y build-essential libtool autotools-dev pkg-config libssl-dev libboost-all-dev autoconf automake
+                - apt-get install -y libqt4-dev libminiupnpc-dev
+                - apt-get install -y libgmp-dev
+                - apt-get install -y openssl
+                - apt-get install -y software-properties-common
+                - add-apt-repository ppa:bitcoin/bitcoin
+                - apt-get update
+                - apt-get install -y libdb4.8-dev libdb4.8++-dev
+                - apt-get install -y ufw
 
 ###############################################################################
 #         MASTERNODE CONFIGURATION                                            #
@@ -39,23 +40,25 @@ firewall_profiles: /etc/ufw/applications.d/
 #         NOTE: Use the same ip address if sharing same VPS for all MNs       #
 ###############################################################################
 coinname: Tokugawa
-services: enabled
+username: tokugawa                                #username to be used for the daemon (can not be root)
+services: enabled                                 #activate daemon service at boot
+firewall: enabled                                 #activate firewall
 
 MASTERNODES:
       - name:             MN01
         rpcport:          21116          
-        ip:               $IP_ADDR_MN01$          #IP FOR MN01
+        ip:               1.1.1.1                 #IP FOR MN01
         ports:
           - 21117                                 #EXTERNAL PORT FOR MN01
         protocols:
           - tcp
-        privkey:          $MN01_PRIVKEY$
+        privkey:          MN01_PRIVKEY_EXAMPLE
 
       - name:             MN02
         rpcport:          21118
-        ip:               $IP_ADDR_MN02$          #IP FOR MN02 can be equal to MN01
+        ip:               1.1.1.1                #IP FOR MN02 can be equal or different if servers has 2 interfaces
         ports:
           - 21119                                #EXTERNAL PORT FOR MN02
         protocols:
           - tcp
-        privkey:          $MN02_PRIVKEY$
+        privkey:          MN02_PRIVKEY_EXAMPLE

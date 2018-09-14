@@ -25,7 +25,7 @@ import subprocess
 from shutil import copyfile 
 
 #List of supported coins by the installer
-supported_coins = ['Tokugawa']
+supported_coins = ['TOKUGAWA']
 
 def show_banner():
     print('')
@@ -66,82 +66,62 @@ def create_directory(absfolder_path):
             raise
 
 #Function to generate the tokugawa service
-def generate_init_service(filename_abspath, name, start_command, stop_command):
+def generate_systemd_service(filename_abspath, description, username, working_directory, start_command, stop_command):
     with open(filename_abspath, 'w') as config:
-        config.write('#! /bin/sh\n');
-        config.write('### BEGIN INIT INFO\n');
-        config.write("# Provides:          %s\n" %name);
-        config.write('# Required-Start:\n');
-        config.write('# Required-Stop:\n');
-        config.write('# Default-Start:     2 3 4 5\n');
-        config.write('# Default-Stop:      0 1 6\n');
-        config.write("# Short-Description: %s masternode service\n" %name);
-        config.write('### END INIT INFO\n');
-        config.write('\n')
-        config.write("PIDOF_PROG=/bin/pidof\n");
-        config.write('\n')
-        config.write('case "$1" in\n');
-        config.write('  start)\n');
-        config.write("    echo \"Starting %s\";\n" %name);
-        config.write("    sudo -u root %s;\n" %start_command);
-        config.write('  ;;\n');
-        config.write('  restart|reload|force-reload)\n');
-        config.write('    echo "Error: argument \'$1\' not supported" >&2\n');
-        config.write('    exit 3\n');
-        config.write('  ;;\n');
-        config.write('  status)\n');
-        config.write("    PROG_PID=`sudo -u root ${PIDOF_PROG} \"%s\"`;\n" %start_command);
-        config.write('    if [ $? -eq 0 ]; then\n');
-        config.write("      echo \"%s is running with pid ${PROG_PID}\"\n" %name);
-        config.write('    else\n');
-        config.write("      echo \"%s is not running\"\n" %name);
-        config.write('    fi\n');
-        config.write('  ;;\n');
-        config.write('  stop)\n');
-        config.write("    echo \"Stopping %s\";\n" %name);
-        config.write("    sudo -u root %s;\n" %stop_command);
-        config.write('  ;;\n');
-        config.write('  *)\n');
-        config.write('    echo "Usage: $0 start|stop" >&2\n');
-        config.write('    exit 3\n');
-        config.write('  ;;\n');
-        config.write('esac\n');
+        config.write('[Unit]\n');
+        config.write("Description=%s\n"%description);
+        config.write('After=network-online.target\n');
+
+        config.write('[Service]\n');
+        config.write("User=%s\n"%username);
+        config.write('Type=forking\n');
+        config.write("WorkingDirectory=%s\n"%working_directory);
+        config.write('Restart=always\n');
+        config.write('RestartSec=10\n');
+        config.write("ExecStart=%s\n"%start_command);
+        config.write("ExecStop=%s\n"%stop_command);
+
+        config.write('[Install]\n');
+        config.write('WantedBy=multi-user.target\n');
 
     #Set access rights to file
-    os.chmod(filename_abspath, 0o755)
+    os.chmod(filename_abspath, 0o644)
 
 #Function that returns start command depending on coin name
-def get_masternode_start_command(coinname, masternode_executable_abspath, masternodedir_abspath):
-    if coinname == 'Tokugawa':
+def get_masternode_start_command(masternode_executable_abspath, masternodedir_abspath):
+    if CONFIG['coinname'].upper() == 'TOKUGAWA':
         start_command = masternode_executable_abspath + " --datadir=%s" %masternodedir_abspath
 
     return start_command
 
 #Function that returns stop command depending on coin name
-def get_masternode_stop_command(coinname, masternode_executable_abspath):
-    if coinname=='Tokugawa':
+def get_masternode_stop_command(masternode_executable_abspath):
+    if CONFIG['coinname'].upper() == 'TOKUGAWA':
         stop_command = masternode_executable_abspath + " --datadir=%s stop" %masternodedir_abspath
 
     return stop_command
 
-def configure_init_service(coinname, mn_name, masternode_executable_abspath, masternode_datadir_abspath):
-    masternode_fullname = "%s_%s".capitalize() %(coinname, mn_name)
-    servicefile_abspath = "/etc/init.d/%s" %masternode_fullname
+def configure_service(masternode_name, masternode_executable_abspath, masternode_datadir_abspath):
+    #Create service filename
+    servicefile_abspath = os.path.abspath(CONFIG['SYSTEM']['services_directory']+"/%s.service" %masternode_name.lower())
     #Masternode specific startup commands
-    start_command = get_masternode_start_command(coinname, masternode_executable_abspath, masternode_datadir_abspath)
-    stop_command  = get_masternode_stop_command (coinname, masternode_executable_abspath)
-    #Generate init service
-    generate_init_service(servicefile_abspath, masternode_fullname, start_command, stop_command)
-    # Enable boot service
-    if cfg['services'] == 'enabled':
-        run_command("systemctl enable %s" %masternode_fullname)
+    start_command = get_masternode_start_command(masternode_executable_abspath, masternode_datadir_abspath)
+    stop_command  = get_masternode_stop_command (masternode_executable_abspath)
+    #Generate systemd service
+    description       = "Service for %s" %masternode_name.upper()
+    working_directory = os.path.dirname(masternode_executable_abspath)
+    username          = "root"
+    generate_systemd_service(servicefile_abspath, description, username, working_directory, start_command, stop_command)
+    # Enable at boot
+    if CONFIG['services'] == 'enabled':
+        run_command("systemctl enable %s" %masternode_name.lower())
 
 #Function to generate an UFW application profile
 def generate_ufw_profile(filename_abspath, name, title, description, ports, protocols):
     #Write application profile
     with open(filename_abspath, 'w+') as config:
-        config.write("[%s]\n"           %name)
-        config.write("title=%s\n"       %title)
+        config.write("[%s]\n"           %name.lower())
+        config.write("title=%s\n"       %title.upper())
         config.write("description=%s\n" %description)
         #Build string for ports
         str_ports     = "".join("%s," %p for p in ports)
@@ -152,11 +132,11 @@ def generate_ufw_profile(filename_abspath, name, title, description, ports, prot
     #Set access rights to file
     os.chmod(filename_abspath, 0o644)
 
-def configure_ufw_firewall(masternode_name, ufwprofiledir_abspath, ports, protocols):
-    #Parameters
-    ufwprofile_abspath = os.path.abspath(ufwprofiledir_abspath+'/'+masternode_name)
+def configure_ufw_firewall(masternode_name, ports, protocols):
+    #Create profile filename
+    ufwprofile_abspath = os.path.abspath(CONFIG['services_directory']+"/%s" %masternode_name.lower())
     #Generating firewall profile
-    generate_ufw_profile(ufwprofile_abspath, masternode_name, "Masternode "+masternode_name, "Provides %s masternode service" %masternode_name, mn['ports'], mn['protocols'])
+    generate_ufw_profile(ufwprofile_abspath, masternode_name, "Masternode %s" %masternode_name, "Provides %s masternode service" %CONFIG['coinname'].lower(), ports, protocols)
     #Allow firewall profile
     run_command("ufw allow %s" %masternode_name)
     #Allow SSH port
@@ -187,9 +167,9 @@ def install_masternode_binaries(executable_abspath, masternode_executable_abspat
     os.chmod(masternode_executable_abspath, 0o755)
 
 #Function to deploy a masternode configuration in the desire location
-def deploy_masternode_configuration(coinname, mn, masternodedir_abspath):
+def deploy_masternode_configuration(mn, masternodedir_abspath):
     #Masternode specific configuration
-    if coinname == 'Tokugawa':
+    if CONFIG['coinname'].upper() == 'TOKUGAWA':
         #Tokugawa.conf file generation
         masternode_tokugawaconf_abspath = os.path.abspath(masternodedir_abspath +'/Tokugawa.conf')
         generate_masternode_tokugawaconf(masternode_tokugawaconf_abspath, mn['name'], mn['rpcport'], mn['ip'], mn['ports'][0], mn['privkey'])
@@ -198,9 +178,9 @@ def deploy_masternode_configuration(coinname, mn, masternodedir_abspath):
 
 
 #Function to deploy a masternode configuration in the desire location
-def deploy_masternode_bootstrap(coinname, bootstrap_abspath, masternodedir_abspath):
+def deploy_masternode_bootstrap(bootstrap_abspath, masternodedir_abspath):
     #Copy bootstrap if present
-    if coinname == 'Tokugawa':
+    if CONFIG['coinname'].upper() == 'TOKUGAWA':
         masternode_bootstrap_basename = os.path.basename(bootstrap_abspath)
         masternode_bootstrap_abspath  = os.path.abspath(masternodedir_abspath+'/'+masternode_bootstrap_basename)
         copyfile(bootstrap_abspath, masternode_bootstrap_abspath)
@@ -229,9 +209,9 @@ if os.geteuid() != 0:
 #Program input parameters
 parser = argparse.ArgumentParser()
 parser.add_argument("installdir",    help="The installation directory.")
-parser.add_argument("executable",    help="The tokugawad binary file.")
+parser.add_argument("executable",    help="The masternode daemon file.")
 parser.add_argument("configuration", help="The installer configuration file.")
-parser.add_argument("--bootstrap",   help="The bootstrap file.")
+parser.add_argument("--bootstrap",   help="The masternode daemon bootstrap file.")
 args = parser.parse_args()
 
 #Build abs names to avoid problems
@@ -251,37 +231,39 @@ if (not os.path.exists(executable_abspath)) or (not os.path.exists(configuration
 
 #Parse the configuration file
 with open(configuration_abspath, 'r') as ymlfile:
-    cfg = yaml.load(ymlfile)
+    CONFIG = yaml.load(ymlfile)
 
 #Set global test mode
-TEST_MODE=cfg.get('test', 'disabled')=='enabled'
+TEST_MODE=CONFIG.get('test', 'disabled')=='enabled'
 
-if cfg['coinname'] not in supported_coins:
+if CONFIG['coinname'].upper() not in supported_coins:
     print('Sorry the selected coin is not yet supported!')
     print('List of supported coins: %s' %supported_coins)
 
 #Show presentation
 show_banner()
-show_warning(cfg['system'])
+show_warning(CONFIG['SYSTEM']['os'])
 
 print('[PREREQUISITES]')
 print('  >> Installing required packages')
 print('     NOTE: The installer will download and install the packages automatically')
 input('           Press ENTER to continue, or CTRL+C to abort installation.\n')
-for cmd in cfg['preparation']:
+for cmd in CONFIG['SYSTEM']['requires']:
     run_command(cmd)
 
 print('')
 print('[INSTALLATION START]')
-for mn in cfg['MASTERNODES']:
+# Create installation directory
+print('>> Creating daemon user')
+run_command("useradd -r -M -N %s" %CONFIG['username'])
+
+for mn in CONFIG['MASTERNODES']:
     #Masternode configuration parameters
-    masternode_name                = "%s_%s".capitalize() %(cfg['coinname'], mn['name'])
-    masternode_datadir_abspath     = os.path.abspath(installdir_abspath + "/." + mn['name'])
-    masternode_executable_basename = os.path.basename(executable_abspath + "_" + mn['name'])
-    masternode_executable_abspath  = os.path.abspath(installdir_abspath + '/' + masternode_executable_basename)
-    ufwprofiledir_abspath          = os.path.abspath(cfg['firewall_profiles'])
+    masternode_name                = "%s_%s".lower() %(CONFIG['coinname'], mn['name'])
+    masternode_datadir_abspath     = os.path.abspath(installdir_abspath + "/." + mn['name'].lower())
+    masternode_executable_abspath  = os.path.abspath(installdir_abspath + '/' + os.path.basename(executable_abspath + "_" + mn['name']).lower())
     #Masternode name
-    print("  %s" %masternode_name)
+    print("  %s" %masternode_name.upper())
     #Create installation directory
     print('    >> Creating binaries installation directory')
     create_directory(installdir_abspath)
@@ -293,17 +275,21 @@ for mn in cfg['MASTERNODES']:
     create_directory(masternode_datadir_abspath)
     #Configuration deployment
     print('    >> Deploying masternode configuration')
-    deploy_masternode_configuration(cfg['coinname'], mn, masternode_datadir_abspath)
+    deploy_masternode_configuration(mn, masternode_datadir_abspath)
     #Bootstrap deployment
     if bootstrap_abspath:
         print('    >> Deploying masternode bootstrap')
-        deploy_masternode_bootstrap(cfg['coinname'], bootstrap_abspath, masternode_datadir_abspath)
+        deploy_masternode_bootstrap(bootstrap_abspath, masternode_datadir_abspath)
     #Init service
-    print('    >> Configuring /etc/init.d service')
-    configure_init_service(cfg['coinname'], mn['name'], masternode_executable_abspath, masternode_datadir_abspath)
+    print('    >> Configuring systemd service')
+    configure_service(masternode_name, masternode_executable_abspath, masternode_datadir_abspath)
     #Firewall
     print('    >> Configuring firewall')
-    configure_ufw_firewall(masternode_name, ufwprofiledir_abspath, mn['ports'], mn['protocols'])
+    configure_ufw_firewall(masternode_name, mn['ports'], mn['protocols'])
+
+# Create installation directory
+print('>> Setting user access rights')
+run_command("chown %s:users %s -R" %(CONFIG['username'], installdir_abspath))
 
 print('[INSTALLATION FINISH]')
 print('')
