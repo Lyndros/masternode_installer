@@ -24,7 +24,7 @@
 <br/> &nbsp; &nbsp; $chmod a+x masternode_installer.py
 <br/>
 <br/> -- This is a configuration example, please modify as needed before running the installer--
-<br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/crypto_tools/master/masternode_installer/config_tokugawa.yml
+<br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/crypto_tools/master/masternode_installer/tokugawa_masternode.yml
 <br/>
 <br/> &nbsp; &nbsp; A bootstrap.dat file is optional but very recommended if you want to have your MNs running asap.
 <br/> &nbsp; &nbsp; The bootstrap for Tokugawa i.e can be retrieved from here -> https://github.com/mangae/Tokugawa_mangae.
@@ -38,8 +38,8 @@
 <br/> &nbsp; &nbsp; $./masternode_installer.py installdir executable configuration.yml [ --bootstrap bootstrap.dat ]
 <br/>
 <br/> &nbsp; &nbsp; Execution examples:
-<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./Tokugawad ./config_tokugawa.yml --bootstrap /tmp/bootstrap.dat
-<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./Tokugawad ./config_tokugawa.yml
+<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./Tokugawad ./tokugawa_masternode.yml --bootstrap /tmp/bootstrap.dat
+<br/> &nbsp; &nbsp; $./masternode_installer.py /opt/tokugawa ./Tokugawad ./tokugawa_masternode.yml
 <br/>
 <br/> <b>4. Manually starting stopping masternode services</b>
 <br/> During the installation boot services for your masternodes had been configured if services was enabled in the 
