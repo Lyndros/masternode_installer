@@ -120,7 +120,7 @@ def get_masternode_start_command(coinname, masternode_executable_abspath, master
 #Function that returns stop command depending on coin name
 def get_masternode_stop_command(coinname, masternode_executable_abspath):
     if coinname=='Tokugawa':
-        stop_command = masternode_executable_abspath + " stop"
+        stop_command = masternode_executable_abspath + " --datadir=%s stop" %masternodedir_abspath
 
     return stop_command
 
@@ -157,8 +157,10 @@ def configure_ufw_firewall(masternode_name, ufwprofiledir_abspath, ports, protoc
     ufwprofile_abspath = os.path.abspath(ufwprofiledir_abspath+'/'+masternode_name)
     #Generating firewall profile
     generate_ufw_profile(ufwprofile_abspath, masternode_name, "Masternode "+masternode_name, "Provides %s masternode service" %masternode_name, mn['ports'], mn['protocols'])
-    # Allow firewall profile
+    #Allow firewall profile
     run_command("ufw allow %s" %masternode_name)
+    #Allow SSH port
+    run_command("ufw allow openssh")
 
 # Function to generate the Tokugawa.conf file under the MN directory
 def generate_masternode_tokugawaconf(filename_abspath, masternode_name, rcpport, ip, port, privkey):
