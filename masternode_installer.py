@@ -95,7 +95,7 @@ def get_masternode_start_command(masternode_executable_abspath, masternodedir_ab
     return start_command
 
 #Function that returns stop command depending on coin name
-def get_masternode_stop_command(masternode_executable_abspath):
+def get_masternode_stop_command(masternode_executable_abspath, masternodedir_abspath):
     if CONFIG['coinname'].upper() == 'TOKUGAWA':
         stop_command = masternode_executable_abspath + " --datadir=%s stop" %masternodedir_abspath
 
@@ -106,9 +106,9 @@ def configure_service(masternode_name, masternode_executable_abspath, masternode
     servicefile_abspath = os.path.abspath(CONFIG['SYSTEM']['services_directory']+"/%s.service" %masternode_name.lower())
     #Masternode specific startup commands
     start_command = get_masternode_start_command(masternode_executable_abspath, masternode_datadir_abspath)
-    stop_command  = get_masternode_stop_command (masternode_executable_abspath)
+    stop_command  = get_masternode_stop_command (masternode_executable_abspath, masternode_datadir_abspath)
     #Generate systemd service
-    description       = "Service for %s" %masternode_name.upper()
+    description       = "Service for %s" %masternode_name.lower()
     working_directory = os.path.dirname(masternode_executable_abspath)
     username          = "root"
     generate_systemd_service(servicefile_abspath, description, username, working_directory, start_command, stop_command)
@@ -121,7 +121,7 @@ def generate_ufw_profile(filename_abspath, name, title, description, ports, prot
     #Write application profile
     with open(filename_abspath, 'w+') as config:
         config.write("[%s]\n"           %name.lower())
-        config.write("title=%s\n"       %title.upper())
+        config.write("title=%s\n"       %title)
         config.write("description=%s\n" %description)
         #Build string for ports
         str_ports     = "".join("%s," %p for p in ports)
@@ -134,13 +134,11 @@ def generate_ufw_profile(filename_abspath, name, title, description, ports, prot
 
 def configure_ufw_firewall(masternode_name, ports, protocols):
     #Create profile filename
-    ufwprofile_abspath = os.path.abspath(CONFIG['services_directory']+"/%s" %masternode_name.lower())
+    ufwprofile_abspath = os.path.abspath(CONFIG['SYSTEM']['firewall_profiles']+"/%s" %masternode_name.lower())
     #Generating firewall profile
-    generate_ufw_profile(ufwprofile_abspath, masternode_name, "Masternode %s" %masternode_name, "Provides %s masternode service" %CONFIG['coinname'].lower(), ports, protocols)
+    generate_ufw_profile(ufwprofile_abspath, masternode_name, "Masternode %s" %masternode_name.lower(), "Provides %s masternode service" %CONFIG['coinname'].lower(), ports, protocols)
     #Allow firewall profile
-    run_command("ufw allow %s" %masternode_name)
-    #Allow SSH port
-    run_command("ufw allow openssh")
+    run_command("ufw allow %s" %masternode_name.lower())
 
 # Function to generate the Tokugawa.conf file under the MN directory
 def generate_masternode_tokugawaconf(filename_abspath, masternode_name, rcpport, ip, port, privkey):
@@ -294,9 +292,16 @@ run_command("chown %s:users %s -R" %(CONFIG['username'], installdir_abspath))
 print('[INSTALLATION FINISH]')
 print('')
 
-#Enable firewall
+#Allow SSH and enable firewall
 print('')
-print('IMPORTANT SSH ACCESS COULD BE BLOCKED!!!')
-print('Check that OpenSSH access rule is set in UFW firewall before activating with:')
-print('\'$ufw enable\'')
+if CONFIG['firewall']:
+    print('SSH ACCESS COULD BE BLOCKED!!!')
+    print('The installer will proceed now to enable the firewall')
+    input('Press ENTER to continue, or CTRL+C to abort to enable the firewall now.\n')
+    run_command("ufw allow openssh")
+    run_command("ufw enable")
+else:
+    print('To enable the firewall, please check that OpenSSH access rule')
+    print('is set and then activate with:')
+    print('\'$ufw enable\'')
 print('')

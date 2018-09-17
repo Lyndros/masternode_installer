@@ -42,7 +42,6 @@ SYSTEM:
 coinname: Tokugawa
 username: tokugawa                                #username to be used for the daemon (can not be root)
 services: enabled                                 #activate daemon service at boot
-firewall: enabled                                 #activate firewall
 
 MASTERNODES:
       - name:             MN01

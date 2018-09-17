@@ -45,11 +45,13 @@
 <br/> During the installation boot services for your masternodes had been configured if services was enabled in the 
 <br/> configuration file.
 <br/> You can manually start/stop a masternode executing: 
-<br/> &nbsp; &nbsp; $/etc/init.d/Tokugawa_MN01 stop | start | status.
+<br/> &nbsp; &nbsp; $systemctl enable tokugawa_mn01 ... mn02
 <br/>
 <br/> <b>5. Firewall</b>
 <br/> During the installation ufw firewall profiles had been installed.
-<br/> IMPORTANT!!!! Before activating firewall please add SSH rules in your UFW firewall configuration if needed. 
+<br/> Before activating firewall please check that SSH rule is present and configured, so please open  
+<br/> the and double check the file /etc/ufw/applications.d/openssh-server.
+<br/> Finally activate with: 
 <br/> &nbsp; &nbsp; $systemctl enable ufw;
 <br/>
 <br/> <b>5. Donations</b>
