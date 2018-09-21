@@ -30,7 +30,7 @@ SYSTEM:
                 - apt-get install -y openssl
                 - apt-get install -y software-properties-common
                 - add-apt-repository ppa:bitcoin/bitcoin
-                - apt-get update
+                - apt-get update -y
                 - apt-get install -y libdb4.8-dev libdb4.8++-dev
                 - apt-get install -y ufw
 
@@ -42,6 +42,7 @@ SYSTEM:
 coinname: Tokugawa
 username: tokugawa                                #username to be used for the daemon (can not be root)
 services: enabled                                 #activate daemon service at boot
+firewall: disabled                                #do not activate the firewall by default, just allow rules
 
 MASTERNODES:
       - name:             MN01
@@ -51,13 +52,13 @@ MASTERNODES:
           - 21117                                 #EXTERNAL PORT FOR MN01
         protocols:
           - tcp
-        privkey:          MN01_PRIVKEY_EXAMPLE
+        privkey:          MN01_PRIVKEY_EXAMPLE    #The private key obtained for MN01 in your wallet client with masternode genprivkey
 
       - name:             MN02
         rpcport:          21118
-        ip:               1.1.1.1                #IP FOR MN02 can be equal or different if servers has 2 interfaces
+        ip:               1.1.1.1                 #IP FOR MN02 can be equal or different if servers has 2 interfaces
         ports:
-          - 21119                                #EXTERNAL PORT FOR MN02
+          - 21119                                 #EXTERNAL PORT FOR MN02
         protocols:
           - tcp
-        privkey:          MN02_PRIVKEY_EXAMPLE
+        privkey:          MN02_PRIVKEY_EXAMPLE    #The private key obtained for MN02 in your wallet client with masternode genprivkey

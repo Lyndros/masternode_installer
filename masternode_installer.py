@@ -110,7 +110,7 @@ def configure_service(masternode_name, masternode_executable_abspath, masternode
     #Generate systemd service
     description       = "Service for %s" %masternode_name.lower()
     working_directory = os.path.dirname(masternode_executable_abspath)
-    username          = "root"
+    username          = CONFIG['username']
     generate_systemd_service(servicefile_abspath, description, username, working_directory, start_command, stop_command)
     # Enable at boot
     if CONFIG['services'] == 'enabled':
@@ -294,14 +294,15 @@ print('')
 
 #Allow SSH and enable firewall
 print('')
-if CONFIG['firewall']:
+if CONFIG['firewall'] == 'enabled':
     print('SSH ACCESS COULD BE BLOCKED!!!')
     print('The installer will proceed now to enable the firewall')
     input('Press ENTER to continue, or CTRL+C to abort to enable the firewall now.\n')
     run_command("ufw allow openssh")
     run_command("ufw enable")
 else:
-    print('To enable the firewall, please check that OpenSSH access rule')
-    print('is set and then activate with:')
+    print('To enable the firewall, please check that OpenSSH access rule is set:')
+    print('\'$ufw allow openssh\'')
+    print('And then activate firewall with:')
     print('\'$ufw enable\'')
 print('')
