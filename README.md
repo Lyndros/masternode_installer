@@ -20,11 +20,11 @@
 <br/>
 <br/> &nbsp; &nbsp; $mkdir -p /tmp/masternode_installer/
 <br/> &nbsp; &nbsp; $cd /tmp/masternode_installer/
-<br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/crypto_tools/master/masternode_installer/masternode_installer.py
+<br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/masternode_installer/master/masternode_installer.py 
 <br/> &nbsp; &nbsp; $chmod a+x masternode_installer.py
 <br/>
 <br/> -- This is a configuration example, please modify as needed before running the installer--
-<br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/crypto_tools/master/masternode_installer/tokugawa_masternode.yml
+<br/> &nbsp; &nbsp; $wget https://raw.githubusercontent.com/Lyndros/masternode_installer/master/masternode_installer.py/config/tokugawa_masternode.yml
 <br/>
 <br/> &nbsp; &nbsp; A bootstrap.dat file is optional but very recommended if you want to have your MNs running asap.
 <br/> &nbsp; &nbsp; The bootstrap for Tokugawa i.e can be retrieved from here -> https://github.com/mangae/Tokugawa_mangae.
