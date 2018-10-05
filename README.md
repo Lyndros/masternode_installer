@@ -60,8 +60,7 @@ $systemctl enable tokugawa_mn01 ... mn02
 
 # 6. Firewall
 During the installation ufw firewall profiles had been installed.
-Before activating firewall please check that SSH rule is present and configured, so please open  
-the and double check the file /etc/ufw/applications.d/openssh-server.
+Before activating firewall please check that SSH rule is present and configured, the file can be found in /etc/ufw/applications.d/openssh-server.
 
 Finally activate with:
 ```
