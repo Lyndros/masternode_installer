@@ -25,7 +25,7 @@ import subprocess
 from shutil import copyfile 
 
 #List of supported coins by the installer
-supported_coins = ['TOKUGAWA']
+supported_coins = ['TOKUGAWA', 'GAINER']
 
 def show_banner():
     print('')
@@ -89,14 +89,14 @@ def generate_systemd_service(filename_abspath, description, username, working_di
 
 #Function that returns start command depending on coin name
 def get_masternode_start_command(masternode_executable_abspath, masternodedir_abspath):
-    if CONFIG['coinname'].upper() == 'TOKUGAWA':
+    if (CONFIG['coinname'].upper() == 'TOKUGAWA') or (CONFIG['coinname'].upper() == 'GAINER'):
         start_command = masternode_executable_abspath + " --datadir=%s" %masternodedir_abspath
 
     return start_command
 
 #Function that returns stop command depending on coin name
 def get_masternode_stop_command(masternode_executable_abspath, masternodedir_abspath):
-    if CONFIG['coinname'].upper() == 'TOKUGAWA':
+    if (CONFIG['coinname'].upper() == 'TOKUGAWA') or (CONFIG['coinname'].upper() == 'GAINER'):
         stop_command = masternode_executable_abspath + " --datadir=%s stop" %masternodedir_abspath
 
     return stop_command
@@ -157,6 +157,23 @@ def generate_masternode_tokugawaconf(filename_abspath, masternode_name, rcpport,
     #Set access rights to file
     os.chmod(filename_abspath, 0o644)
 
+# Function to generate the GainerCoin.conf file under the MN directory
+def generate_masternode_gainercoinconf(filename_abspath, masternode_name, rcpport, ip, port, privkey):
+    with open(filename_abspath, 'w+') as config:
+        config.write('rpcuser=myrpcuser%s\n' %masternode_name.lower())
+        config.write('rpcpassword=%s\n' % generate_password())
+        config.write('rpcport=%s\n' %rcpport)
+        config.write('server=1\n')
+        config.write('listen=1\n')
+        config.write('daemon=1\n')
+        config.write('port=%s\n' %port)
+        config.write('masternodeaddr=%s:%s\n' % (ip, port))
+        config.write('masternode=1\n')
+        config.write('masternodeprivkey=%s\n' % mn['privkey'])
+
+    #Set access rights to file
+    os.chmod(filename_abspath, 0o644)
+
 #Function to install binaries in the desire location
 def install_masternode_binaries(executable_abspath, masternode_executable_abspath):
     #Copy daemon file with the following name
@@ -166,19 +183,21 @@ def install_masternode_binaries(executable_abspath, masternode_executable_abspat
 
 #Function to deploy a masternode configuration in the desire location
 def deploy_masternode_configuration(mn, masternodedir_abspath):
-    #Masternode specific configuration
+    #TOKUGAWA Coin specific settings
     if CONFIG['coinname'].upper() == 'TOKUGAWA':
         #Tokugawa.conf file generation
         masternode_tokugawaconf_abspath = os.path.abspath(masternodedir_abspath +'/Tokugawa.conf')
         generate_masternode_tokugawaconf(masternode_tokugawaconf_abspath, mn['name'], mn['rpcport'], mn['ip'], mn['ports'][0], mn['privkey'])
-        #Set access rights to file
-        os.chmod(masternode_tokugawaconf_abspath, 0o644)
-
+    #GAINER Coin specific settings
+    elif CONFIG['coinname'].upper() == 'GAINER':
+        #GainerCoin.conf file generation
+        masternode_gainercoinconf_abspath = os.path.abspath(masternodedir_abspath +'/GainerCoin.conf')
+        generate_masternode_gainercoinconf(masternode_gainercoinconf_abspath, mn['name'], mn['rpcport'], mn['ip'], mn['ports'][0], mn['privkey'])
 
 #Function to deploy a masternode configuration in the desire location
 def deploy_masternode_bootstrap(bootstrap_abspath, masternodedir_abspath):
     #Copy bootstrap if present
-    if CONFIG['coinname'].upper() == 'TOKUGAWA':
+    if (CONFIG['coinname'].upper() == 'TOKUGAWA') or (CONFIG['coinname'].upper() == 'GAINER'):
         masternode_bootstrap_basename = os.path.basename(bootstrap_abspath)
         masternode_bootstrap_abspath  = os.path.abspath(masternodedir_abspath+'/'+masternode_bootstrap_basename)
         copyfile(bootstrap_abspath, masternode_bootstrap_abspath)
@@ -235,17 +254,18 @@ with open(configuration_abspath, 'r') as ymlfile:
 TEST_MODE=CONFIG.get('test', 'disabled')=='enabled'
 
 if CONFIG['coinname'].upper() not in supported_coins:
-    print('Sorry the selected coin is not yet supported!')
+    print('Error! The selected coin is not yet supported!')
     print('List of supported coins: %s' %supported_coins)
+    sys.exit(-1)
 
 #Show presentation
 show_banner()
 show_warning(CONFIG['SYSTEM']['os'])
 
 print('[PREREQUISITES]')
-print('  >> Installing required packages')
-print('     NOTE: The installer will download and install the packages automatically')
-input('           Press ENTER to continue, or CTRL+C to abort installation.\n')
+print('>> Installing required packages')
+print('   NOTE: The installer will download and install the packages automatically')
+input('         Press ENTER to continue, or CTRL+C to abort installation.\n')
 for cmd in CONFIG['SYSTEM']['requires']:
     run_command(cmd)
 
@@ -255,34 +275,34 @@ print('[INSTALLATION START]')
 print('>> Creating daemon user')
 run_command("useradd -r -M -N %s" %CONFIG['username'])
 
+#MASTERNODES share installation directory and binary
+masternode_executable_abspath = os.path.abspath(installdir_abspath + '/' + os.path.basename(executable_abspath).lower())
+print('>> Creating installation directory')
+create_directory(installdir_abspath)
+print('>> Installing binaries')
+install_masternode_binaries(executable_abspath, masternode_executable_abspath)
+
 for mn in CONFIG['MASTERNODES']:
     #Masternode configuration parameters
     masternode_name                = "%s_%s".lower() %(CONFIG['coinname'], mn['name'])
     masternode_datadir_abspath     = os.path.abspath(installdir_abspath + "/." + mn['name'].lower())
-    masternode_executable_abspath  = os.path.abspath(installdir_abspath + '/' + os.path.basename(executable_abspath + "_" + mn['name']).lower())
     #Masternode name
-    print("  %s" %masternode_name.upper())
-    #Create installation directory
-    print('    >> Creating binaries installation directory')
-    create_directory(installdir_abspath)
-    #Install masternode binaries
-    print('    >> Installing binaries')
-    install_masternode_binaries(executable_abspath, masternode_executable_abspath)
+    print(">> %s" %masternode_name.upper())
     #Masternode directory creation
-    print('    >> Creating masternode data directory')
+    print('   - Creating masternode data directory')
     create_directory(masternode_datadir_abspath)
     #Configuration deployment
-    print('    >> Deploying masternode configuration')
+    print('   - Deploying masternode configuration')
     deploy_masternode_configuration(mn, masternode_datadir_abspath)
     #Bootstrap deployment
     if bootstrap_abspath:
-        print('    >> Deploying masternode bootstrap')
+        print('   - Deploying masternode bootstrap')
         deploy_masternode_bootstrap(bootstrap_abspath, masternode_datadir_abspath)
     #Init service
-    print('    >> Configuring systemd service')
+    print('   - Configuring systemd service')
     configure_service(masternode_name, masternode_executable_abspath, masternode_datadir_abspath)
     #Firewall
-    print('    >> Configuring firewall')
+    print('   - Configuring firewall')
     configure_ufw_firewall(masternode_name, mn['ports'], mn['protocols'])
 
 # Create installation directory
@@ -294,6 +314,7 @@ print('')
 
 #Allow SSH and enable firewall
 print('')
+print('[FIREWALL]')
 if CONFIG['firewall'] == 'enabled':
     print('SSH ACCESS COULD BE BLOCKED!!!')
     print('The installer will proceed now to enable the firewall')

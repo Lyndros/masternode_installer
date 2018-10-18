@@ -2,7 +2,7 @@
 
 A beautiful python installer that allows you to install your beloved masternodes within minutes.
  
-NOTE: Currently the installer ONLY supports TOKUGAWA coin, more coins will be added.
+NOTE: Currently the installer ONLY supports TOKUGAWA and GAINER coin, more coins will be added.
 
 # 1. Requirements
 
@@ -25,12 +25,14 @@ $chmod a+x masternode_installer.py
 
 -- This is a configuration example, please modify as needed before running the installer--
 ```
-$wget https://raw.githubusercontent.com/Lyndros/masternode_installer/master/masternode_installer.py/config/tokugawa_masternode.yml
+$wget https://raw.githubusercontent.com/Lyndros/masternode_installer/master/config/tokugawa_masternode.yml
+$wget https://raw.githubusercontent.com/Lyndros/masternode_installer/master/config/gainer_masternode.yml
 ```
 
 A bootstrap.dat file is optional but very recommended if you want to have your MNs running asap.
 
-The bootstrap for Tokugawa coin can be obtained from <a href="https://github.com/mangae/Tokugawa_mangae">here</a>.
+The bootstrap for Tokugawa coin can be obtained from <a href="https://github.com/mangae/Tokugawa_mangae">here</a>, 
+for gainer coin please ask the coin developer.
 
 # 3. Setting your configuration file
 
@@ -46,6 +48,9 @@ Execution examples:
 ```
 $./masternode_installer.py /opt/tokugawa ./Tokugawad ./tokugawa_masternode.yml --bootstrap /tmp/bootstrap.dat
 $./masternode_installer.py /opt/tokugawa ./Tokugawad ./tokugawa_masternode.yml
+
+$./masternode_installer.py /opt/tokugawa ./Gainercoind ./gainer_masternode.yml --bootstrap /tmp/bootstrap.dat
+$./masternode_installer.py /opt/tokugawa ./Gainercoind ./gainer_masternode.yml
 ```
 
 # 5. Manually starting stopping masternode services
@@ -56,6 +61,8 @@ configuration file.
 You can manually start/stop a masternode executing: 
 ```
 $systemctl enable tokugawa_mn01 ... mn02
+or
+$systemctl enable gainer_mn01 ... mn02
 ```
 
 # 6. Firewall
