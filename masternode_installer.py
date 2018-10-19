@@ -11,7 +11,7 @@
 # If you want to support and motivate me I accept donations even 1 TOK is     #
 # always welcome :-)!                                                         #
 # > ethereum address: 0x44F102616C8e19fF3FED10c0b05B3d23595211ce              #
-# > tokugawa address: TjrQBaaCPoVW9mPAZHPfVx9JJCq7yZ7QnA                      #
+# > tokugawa address: TqtycVQsthmEtMLGA8RtqHupZNPDH1Fnt9                      #
 #                                                                             #
 ###############################################################################
 import yaml
@@ -37,7 +37,7 @@ def show_banner():
     print('# If you want to support and motivate me I accept donations even 1 TOK is     #')
     print('# always welcome :-)!                                                         #')
     print('# > ethereum address: 0x44F102616C8e19fF3FED10c0b05B3d23595211ce              #')
-    print('# > tokugawa address: TjrQBaaCPoVW9mPAZHPfVx9JJCq7yZ7QnA                      #')
+    print('# > tokugawa address: TqtycVQsthmEtMLGA8RtqHupZNPDH1Fnt9                      #')
     print('#                                                                             #')
     print('###############################################################################')
     print('')
