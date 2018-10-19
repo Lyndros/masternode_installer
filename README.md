@@ -1,8 +1,11 @@
-# Masternode installer instructions
+# Multiple masternode installer instructions
 
-A beautiful python installer that allows you to install your beloved masternodes within minutes.
- 
-NOTE: Currently the installer ONLY supports TOKUGAWA and GAINER coin, more coins will be added.
+A beautiful masternode installer that allows you to install several instances within minutes.
+
+As you may realise deploying several masternodes is not in our top 10 beloved tasks, so in oder to avoid and reduce 
+this repetitive activities I created this program.
+
+NOTE: Currently the installer ONLY supports TOKUGAWA and GAINER coin in the near future more coins will be added.
 
 # 1. Requirements
 
