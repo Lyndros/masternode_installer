@@ -5,7 +5,7 @@ A beautiful masternode installer that allows you to install several instances wi
 As you may realise deploying several masternodes is not in our top 10 beloved tasks, so in oder to avoid and reduce 
 this repetitive activities I created this program.
 
-NOTE: Currently the installer ONLY supports TOKUGAWA and GAINER coin in the near future more coins will be added.
+NOTE: Currently the installer supports TOKUGAWA, GAINER and ABSOLUTE coin in the near future more coins will be added.
 
 # 1. Requirements
 
@@ -30,6 +30,7 @@ $chmod a+x masternode_installer.py
 ```
 $wget https://raw.githubusercontent.com/Lyndros/masternode_installer/master/config/tokugawa_masternode.yml
 $wget https://raw.githubusercontent.com/Lyndros/masternode_installer/master/config/gainer_masternode.yml
+$wget https://raw.githubusercontent.com/Lyndros/masternode_installer/master/config/absolute_masternode.yml
 ```
 
 A bootstrap.dat file is optional but very recommended if you want to have your MNs running asap.
@@ -52,8 +53,10 @@ Execution examples:
 $./masternode_installer.py /opt/tokugawa ./Tokugawad ./tokugawa_masternode.yml --bootstrap /tmp/bootstrap.dat
 $./masternode_installer.py /opt/tokugawa ./Tokugawad ./tokugawa_masternode.yml
 
-$./masternode_installer.py /opt/tokugawa ./Gainercoind ./gainer_masternode.yml --bootstrap /tmp/bootstrap.dat
-$./masternode_installer.py /opt/tokugawa ./Gainercoind ./gainer_masternode.yml
+$./masternode_installer.py /opt/gainercoin ./Gainercoind ./gainer_masternode.yml --bootstrap /tmp/bootstrap.dat
+$./masternode_installer.py /opt/gainercoin ./Gainercoind ./gainer_masternode.yml
+
+$./masternode_installer.py /opt/absolute ./absoluted ./absolute_masternode.yml
 ```
 
 # 5. Manually starting stopping masternode services
@@ -66,6 +69,8 @@ You can manually start/stop a masternode executing:
 $systemctl enable tokugawa_mn01 ... mn02
 or
 $systemctl enable gainer_mn01 ... mn02
+or
+$systemctl enable absolute_mn01 ... mn02
 ```
 
 # 6. Firewall

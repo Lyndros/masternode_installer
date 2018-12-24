@@ -24,7 +24,8 @@ SYSTEM:
         firewall_profiles:  /etc/ufw/applications.d
 
         requires:
-                - apt-get install -y libboost-all-dev
+                - apt-get install -y build-essential libtool autotools-dev pkg-config libssl-dev libboost-all-dev autoconf automake
+                - apt-get install -y libqt4-dev libminiupnpc-dev
                 - apt-get install -y software-properties-common
                 - add-apt-repository -y ppa:bitcoin/bitcoin
                 - apt-get update -y

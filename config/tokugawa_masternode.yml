@@ -46,7 +46,7 @@ firewall: disabled                                #do not activate the firewall 
 
 MASTERNODES:
       - name:             MN01
-        rpcport:          21116          
+        rpcport:          21116
         ip:               1.1.1.1                 #IP FOR MN01
         ports:
           - 21117                                 #EXTERNAL PORT FOR MN01

@@ -22,10 +22,10 @@ import errno
 import string
 import random
 import subprocess
-from shutil import copyfile 
+from shutil import copyfile
 
 #List of supported coins by the installer
-supported_coins = ['TOKUGAWA', 'GAINER']
+supported_coins = ['TOKUGAWA', 'GAINER', 'ABSOLUTE']
 
 def show_banner():
     print('')
@@ -53,7 +53,7 @@ def generate_password():
     max_char = 12
     allchar = string.ascii_letters + string.punctuation + string.digits
     password = "".join(random.choice(allchar) for x in range(random.randint(min_char, max_char)))
-    
+
     return password
 
 #Function to create a directory
@@ -65,7 +65,7 @@ def create_directory(absfolder_path):
         if e.errno != errno.EEXIST:
             raise
 
-#Function to generate the tokugawa service
+#Function to generate the masternode service for systemctl
 def generate_systemd_service(filename_abspath, description, username, working_directory, start_command, stop_command):
     with open(filename_abspath, 'w') as config:
         config.write('[Unit]\n');
@@ -89,15 +89,31 @@ def generate_systemd_service(filename_abspath, description, username, working_di
 
 #Function that returns start command depending on coin name
 def get_masternode_start_command(masternode_executable_abspath, masternodedir_abspath):
-    if (CONFIG['coinname'].upper() == 'TOKUGAWA') or (CONFIG['coinname'].upper() == 'GAINER'):
+    #TOKUGAWA Coin specific settings
+    if CONFIG['coinname'].upper() == 'TOKUGAWA':
         start_command = masternode_executable_abspath + " --datadir=%s" %masternodedir_abspath
+    #GAINER Coin specific settings
+    elif CONFIG['coinname'].upper() == 'GAINER':
+        start_command = masternode_executable_abspath + " --datadir=%s" %masternodedir_abspath
+    #ABSOLUTE Coin specific settings
+    elif CONFIG['coinname'].upper() == 'ABSOLUTE':
+        start_command = masternode_executable_abspath + " -datadir=%s" %masternodedir_abspath
 
     return start_command
 
 #Function that returns stop command depending on coin name
 def get_masternode_stop_command(masternode_executable_abspath, masternodedir_abspath):
-    if (CONFIG['coinname'].upper() == 'TOKUGAWA') or (CONFIG['coinname'].upper() == 'GAINER'):
+    #TOKUGAWA Coin specific settings
+    if CONFIG['coinname'].upper() == 'TOKUGAWA':
         stop_command = masternode_executable_abspath + " --datadir=%s stop" %masternodedir_abspath
+    #GAINER Coin specific settings
+    elif CONFIG['coinname'].upper() == 'GAINER':
+        stop_command = masternode_executable_abspath + " --datadir=%s stop" %masternodedir_abspath
+    #ABSOLUTE Coin specific settings
+    elif CONFIG['coinname'].upper() == 'ABSOLUTE':
+        working_directory = os.path.dirname(masternode_executable_abspath)
+        masternodecli_executable_abspath = working_directory+/"absolute-cli"
+        stop_command = masternodecli_executable_abspath + " -datadir=%s" %masternodedir_abspath + " stop"
 
     return stop_command
 
@@ -174,6 +190,23 @@ def generate_masternode_gainercoinconf(filename_abspath, masternode_name, rcppor
     #Set access rights to file
     os.chmod(filename_abspath, 0o644)
 
+# Function to generate the Absolute.conf file under the MN directory
+def generate_masternode_absoluteconf(filename_abspath, masternode_name, rcpport, ip, port, privkey):
+    with open(filename_abspath, 'w+') as config:
+        config.write('rpcuser=myrpcuser%s\n' %masternode_name.lower())
+        config.write('rpcpassword=%s\n' % generate_password())
+        config.write('rpcport=%s\n' %rcpport)
+        config.write('server=1\n')
+        config.write('listen=1\n')
+        config.write('daemon=1\n')
+        config.write('port=%s\n' %port)
+        config.write('masternodeaddr=%s:%s\n' % (ip, port))
+        config.write('masternode=1\n')
+        config.write('masternodeprivkey=%s\n' % mn['privkey'])
+
+    #Set access rights to file
+    os.chmod(filename_abspath, 0o644)
+
 #Function to install binaries in the desire location
 def install_masternode_binaries(executable_abspath, masternode_executable_abspath):
     #Copy daemon file with the following name
@@ -193,6 +226,11 @@ def deploy_masternode_configuration(mn, masternodedir_abspath):
         #GainerCoin.conf file generation
         masternode_gainercoinconf_abspath = os.path.abspath(masternodedir_abspath +'/GainerCoin.conf')
         generate_masternode_gainercoinconf(masternode_gainercoinconf_abspath, mn['name'], mn['rpcport'], mn['ip'], mn['ports'][0], mn['privkey'])
+    #ABSOLUTE Coin specific settings
+    elif CONFIG['coinname'].upper() == 'ABSOLUTE':
+        #Absolute.conf file generation
+        masternode_absoluteconf_abspath = os.path.abspath(masternodedir_abspath +'/Absolute.conf')
+        generate_masternode_absoluteconf(masternode_absoluteconf_abspath, mn['name'], mn['rpcport'], mn['ip'], mn['ports'][0], mn['privkey'])
 
 #Function to deploy a masternode configuration in the desire location
 def deploy_masternode_bootstrap(bootstrap_abspath, masternodedir_abspath):
