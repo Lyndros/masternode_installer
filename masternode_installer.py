@@ -97,7 +97,7 @@ def get_masternode_start_command(masternode_executable_abspath, masternodedir_ab
         start_command = masternode_executable_abspath + " --datadir=%s" %masternodedir_abspath
     #ABSOLUTE Coin specific settings
     elif CONFIG['coinname'].upper() == 'ABSOLUTE':
-        start_command = masternode_executable_abspath + " -datadir=%s" %masternodedir_abspath
+        start_command = masternode_executable_abspath + " -daemon -datadir=%s" %masternodedir_abspath
 
     return start_command
 
@@ -112,7 +112,7 @@ def get_masternode_stop_command(masternode_executable_abspath, masternodedir_abs
     #ABSOLUTE Coin specific settings
     elif CONFIG['coinname'].upper() == 'ABSOLUTE':
         working_directory = os.path.dirname(masternode_executable_abspath)
-        masternodecli_executable_abspath = working_directory+/"absolute-cli"
+        masternodecli_executable_abspath = working_directory+"/absolute-cli"
         stop_command = masternodecli_executable_abspath + " -datadir=%s" %masternodedir_abspath + " stop"
 
     return stop_command
@@ -200,10 +200,11 @@ def generate_masternode_absoluteconf(filename_abspath, masternode_name, rcpport,
         config.write('listen=1\n')
         config.write('daemon=1\n')
         config.write('port=%s\n' %port)
-        config.write('masternodeaddr=%s:%s\n' % (ip, port))
+        config.write('rpcallowip=%s\n' %ip)
+        config.write('externalip=%s:%s\n' % (ip, port))
         config.write('masternode=1\n')
         config.write('masternodeprivkey=%s\n' % mn['privkey'])
-
+    
     #Set access rights to file
     os.chmod(filename_abspath, 0o644)
 
@@ -229,7 +230,7 @@ def deploy_masternode_configuration(mn, masternodedir_abspath):
     #ABSOLUTE Coin specific settings
     elif CONFIG['coinname'].upper() == 'ABSOLUTE':
         #Absolute.conf file generation
-        masternode_absoluteconf_abspath = os.path.abspath(masternodedir_abspath +'/Absolute.conf')
+        masternode_absoluteconf_abspath = os.path.abspath(masternodedir_abspath +'/absolute.conf')
         generate_masternode_absoluteconf(masternode_absoluteconf_abspath, mn['name'], mn['rpcport'], mn['ip'], mn['ports'][0], mn['privkey'])
 
 #Function to deploy a masternode configuration in the desire location
