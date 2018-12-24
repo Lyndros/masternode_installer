@@ -1,0 +1,61 @@
+###############################################################################
+# MASTERNODE AUTOINSTALLER by Lyndros <lyndros@hotmail.com>                   #
+###############################################################################
+# Repository: https://github.com/Lyndros/crypto_tools                         #
+#                                                                             #
+# If you want to support and motivate me I accept donations even 1 TOK is     #
+# always welcome :-)!                                                         #
+# > ethereum address: 0x44F102616C8e19fF3FED10c0b05B3d23595211ce              #
+# > tokugawa address: TaJHPdZVGutRS9PzbYW9NojjpboeFM1w4A                      #
+#                                                                             #
+###############################################################################
+
+###############################################################################
+#                     Configuration for Ubuntu 18.04                          #
+###############################################################################
+
+###############################################################################
+#            USUALLY THESE SETTINGS DOES NOT NEED TO BE MODIFIED              #
+###############################################################################
+#GENERAL SYSTEM SETTINGS
+SYSTEM:
+        os:                 Ubuntu 18.04
+        services_directory: /etc/systemd/system
+        firewall_profiles:  /etc/ufw/applications.d
+
+        requires:
+                - apt-get install -y libboost-all-dev
+                - apt-get install -y software-properties-common
+                - add-apt-repository -y ppa:bitcoin/bitcoin
+                - apt-get update -y
+                - apt-get install -y libdb4.8-dev libdb4.8++-dev
+                - apt-get install -y libevent-dev
+                - apt-get install -y ufw
+###############################################################################
+#         MASTERNODE CONFIGURATION                                            #
+#         Define your IP, port and private keys                               #
+#         NOTE: Use the same ip address if sharing same VPS for all MNs       #
+###############################################################################
+coinname: Absolute
+username: absolute                                #username to be used for the daemon (can not be root)
+services: enabled                                 #activate daemon service at boot
+firewall: disabled                                #do not activate the firewall by default, just allow rules
+
+MASTERNODES:
+      - name:             MN01
+        rpcport:          18887
+        ip:               1.1.1.1                 #IP FOR MN01
+        ports:
+          - 18888                                 #EXTERNAL PORT FOR MN01
+        protocols:
+          - tcp
+        privkey:          MN01_PRIVKEY_EXAMPLE    #The private key obtained for MN01 in your wallet client with masternode genprivkey
+
+      - name:             MN02
+        rpcport:          18889
+        ip:               1.1.1.1                 #IP FOR MN02 can be equal or different if servers has 2 interfaces
+        ports:
+          - 18890                                 #EXTERNAL PORT FOR MN02
+        protocols:
+          - tcp
+        privkey:          MN02_PRIVKEY_EXAMPLE    #The private key obtained for MN02 in your wallet client with masternode genprivkey
