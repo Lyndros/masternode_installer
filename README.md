@@ -83,8 +83,7 @@ $systemctl enable ufw;
 ```
 
 # 7. Donations
-If you want to motivate me and support this repository I accept donations even 1 TOK is always welcome :-)!
+If you want to motivate me and support this repository I accept donations even the smallest portion of ETH is always welcome :-)!
 * ethereum address:</b> <i>0x44F102616C8e19fF3FED10c0b05B3d23595211ce</i>
-* tokugawa address:</b> <i>TaJHPdZVGutRS9PzbYW9NojjpboeFM1w4A</i>
 
 For any questions feel free to contact me at <i>lyndros at hotmail.com</i>
